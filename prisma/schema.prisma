@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  password     String
+  name         String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  experiences  Experience[]
+  education    Education[]
+  skills       Skill[]
+  interests    Interest[]
+}
+
+model Experience {
+  id          Int      @id @default(autoincrement())
+  title       String
+  company     String
+  startDate   DateTime
+  endDate     DateTime?
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Education {
+  id          Int      @id @default(autoincrement())
+  school      String
+  degree      String
+  field       String
+  startDate   DateTime
+  endDate     DateTime?
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Skill {
+  id        Int    @id @default(autoincrement())
+  name      String
+  userId    Int
+  user      User   @relation(fields: [userId], references: [id])
+}
+
+model Interest {
+  id        Int    @id @default(autoincrement())
+  name      String
+  userId    Int
+  user      User   @relation(fields: [userId], references: [id])
+}
+
+
+model Opportunity {
+  id               Int       @id @default(autoincrement())
+  title            String
+  description      String
+  company          String
+  location         String
+  salary           String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  dateLimit        DateTime?
+  sectors          Json
+  targetAudience   Json
+  advantages       Json
+  selectionProcess String
+}
