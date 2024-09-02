@@ -1,16 +1,7 @@
-generator client {
-  provider = "prisma-client-js"
-  previewFeatures = ["referentialIntegrity"]
-}
-
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
   referentialIntegrity = "prisma"
-
-  // Limite le nombre de connexions simultanées
-  poolTimeout = 10 // Temps en secondes avant la fermeture d'une connexion inactive
-  maxIdleConnections = 1 // Nombre maximum de connexions inactives
 }
 
 
