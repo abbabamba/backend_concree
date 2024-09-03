@@ -1,28 +1,35 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class OpportunitiesService {
+  private readonly logger = new Logger(OpportunitiesService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
-  // Method to get all opportunities
   async findAll() {
-    const opportunities = await this.prisma.opportunity.findMany();
-    console.log('Opportunities found:', opportunities.length);
-    return opportunities;
+    try {
+      const opportunities = await this.prisma.opportunity.findMany();
+      this.logger.log(`Found ${opportunities.length} opportunities`);
+      return opportunities;
+    } catch (error) {
+      this.logger.error('Error fetching opportunities', error.stack);
+      throw error;
+    }
   }
 
-  // Method to get a specific opportunity by ID
   async findOne(id: number) {
-    const opportunity = await this.prisma.opportunity.findUnique({
-      where: { id },
-      // Removed the include for applications since it no longer exists
-    });
-
-    if (!opportunity) {
-      throw new NotFoundException('Opportunité non trouvée');
+    try {
+      const opportunity = await this.prisma.opportunity.findUnique({
+        where: { id },
+      });
+      if (!opportunity) {
+        throw new NotFoundException(`Opportunity with ID ${id} not found`);
+      }
+      return opportunity;
+    } catch (error) {
+      this.logger.error(`Error fetching opportunity with ID ${id}`, error.stack);
+      throw error;
     }
-
-    return opportunity;
   }
 }
