@@ -13,26 +13,28 @@ export class UserService {
     password: string;
     name: string;
     skills?: string[];
-    experiences?: { title: string; company: string; startDate: Date | string; endDate?: Date | string }[];
-    education?: { degree: string; school: string; field: string; startDate: Date | string; endDate?: Date | string }[];
+    experiences?: { title: string; company: string; startDate: string; endDate?: string }[];
+    education?: { degree: string; school: string; field: string; startDate: string; endDate?: string }[];
     interests?: string[];
   }) {
     const hashedPassword = await bcrypt.hash(userData.password, 10);
-
+  
     try {
-      return this.prisma.user.create({
+      return await this.prisma.user.create({
         data: {
           email: userData.email,
           password: hashedPassword,
           name: userData.name,
-          skills: userData.skills ? { create: userData.skills.map(skill => ({ name: skill })) } : undefined,
+          skills: userData.skills ? {
+            create: userData.skills.map(name => ({ name }))
+          } : undefined,
           experiences: userData.experiences ? {
             create: userData.experiences.map(exp => ({
               title: exp.title,
               company: exp.company,
               startDate: new Date(exp.startDate),
               endDate: exp.endDate ? new Date(exp.endDate) : null,
-            })),
+            }))
           } : undefined,
           education: userData.education ? {
             create: userData.education.map(edu => ({
@@ -41,9 +43,11 @@ export class UserService {
               field: edu.field,
               startDate: new Date(edu.startDate),
               endDate: edu.endDate ? new Date(edu.endDate) : null,
-            })),
+            }))
           } : undefined,
-          interests: userData.interests ? { create: userData.interests.map(interest => ({ name: interest })) } : undefined,
+          interests: userData.interests ? {
+            create: userData.interests.map(name => ({ name }))
+          } : undefined,
         },
         include: {
           skills: true,
@@ -53,7 +57,9 @@ export class UserService {
         },
       });
     } catch (error) {
-      console.error('Error while creating user:', error);
+      if (error.code === 'P2002') {
+        throw new BadRequestException('Email already exists');
+      }
       throw new BadRequestException('Failed to create user');
     }
   }

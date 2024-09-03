@@ -1,4 +1,3 @@
-// users.controller.ts
 import {
   Controller,
   Post,
@@ -11,20 +10,29 @@ import {
 } from '@nestjs/common';
 import { UserService } from './users.service';
 
-@Controller('users')
+@Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('register')
-  async register(@Body() body: any) {
+  async register(@Body() body: {
+    email: string;
+    password: string;
+    name: string;
+    skills?: string[];
+    experiences?: { title: string; company: string; startDate: string; endDate?: string }[];
+    education?: { degree: string; school: string; field: string; startDate: string; endDate?: string }[];
+    interests?: string[];
+  }) {
     const existingUser = await this.userService.findUserByEmail(body.email);
     if (existingUser) {
       throw new BadRequestException('Email already in use');
     }
-
     const user = await this.userService.createUser(body);
     return { message: 'User registered successfully', user };
   }
+
+ 
 
   @Post('login')
   async login(@Body() body: { email: string; password: string }) {
