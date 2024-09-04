@@ -51,19 +51,21 @@ export class UserController {
   }
 
   @Put('profile/:id')
-async updateProfile(
-  @Param('id', ParseIntPipe) userId: number,
-  @Body() updateData: any,
-) {
-  try {
-    const updatedUser = await this.userService.updateUser(userId, updateData);
-    return { message: 'Profile updated successfully', user: updatedUser };
-  } catch (error) {
-    console.error('Error updating user profile:', error);
-    if (error instanceof BadRequestException) {
-      throw error;
+  async updateProfile(
+    @Param('id', ParseIntPipe) userId: number,
+    @Body() updateData: any,
+  ) {
+    try {
+      console.log(`Attempting to update user ${userId} with data:`, JSON.stringify(updateData, null, 2));
+      const updatedUser = await this.userService.updateUser(userId, updateData);
+      return { message: 'Profile updated successfully', user: updatedUser };
+    } catch (error) {
+      console.error(`Error updating user ${userId}:`, error);
+      console.error('Stack trace:', error.stack);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(`Failed to update user profile: ${error.message}`);
     }
-    throw new BadRequestException(`Failed to update user profile: ${error.message}`);
   }
-}
 }

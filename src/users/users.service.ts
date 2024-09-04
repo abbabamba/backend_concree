@@ -97,30 +97,28 @@ export class UserService {
     password?: string;
     skills?: string[];
     experiences?: { id?: number; title: string; company: string; startDate: Date | string; endDate?: Date | string }[];
-    education?: { id?: number; degree: string; school: string; field: string; startDate: Date | string; endDate?: Date | string }[];
+    education?: { id?: number; degree: string; school: string; field: string; startDate: Date | string; endDate?: string }[];
     interests?: string[];
   }) {
-    const updateData: any = { 
-      email: data.email,
-      name: data.name
-    };
+    const updateData: any = {};
     
+    if (data.email) updateData.email = data.email;
+    if (data.name) updateData.name = data.name;
     if (data.password) {
       updateData.password = await bcrypt.hash(data.password, 10);
     }
   
     try {
-      // Utilisation de connectOrCreate pour éviter les duplications
-      if (data.skills) {
+      if (Array.isArray(data.skills) && data.skills.length > 0) {
         updateData.skills = {
-          deleteMany: {}, // Supprime toutes les anciennes compétences
+          deleteMany: {},
           create: data.skills.map(skill => ({ name: skill })),
         };
       }
   
-      if (data.experiences) {
+      if (Array.isArray(data.experiences) && data.experiences.length > 0) {
         updateData.experiences = {
-          deleteMany: {}, // Supprime toutes les anciennes expériences
+          deleteMany: {},
           create: data.experiences.map(exp => ({
             title: exp.title,
             company: exp.company,
@@ -130,9 +128,9 @@ export class UserService {
         };
       }
   
-      if (data.education) {
+      if (Array.isArray(data.education) && data.education.length > 0) {
         updateData.education = {
-          deleteMany: {}, // Supprime toutes les anciennes formations
+          deleteMany: {},
           create: data.education.map(edu => ({
             degree: edu.degree,
             school: edu.school,
@@ -143,12 +141,14 @@ export class UserService {
         };
       }
   
-      if (data.interests) {
+      if (Array.isArray(data.interests) && data.interests.length > 0) {
         updateData.interests = {
-          deleteMany: {}, // Supprime tous les anciens intérêts
+          deleteMany: {},
           create: data.interests.map(interest => ({ name: interest })),
         };
       }
+  
+      console.log('Updating user with data:', JSON.stringify(updateData, null, 2));
   
       return await this.prisma.user.update({
         where: { id },
@@ -162,7 +162,7 @@ export class UserService {
       });
     } catch (error) {
       console.error('Error while updating user:', error);
-      throw new BadRequestException('Failed to update user');
+      throw new BadRequestException(`Failed to update user: ${error.message}`);
     }
   }
   
