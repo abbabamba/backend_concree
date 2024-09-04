@@ -65,7 +65,11 @@ export class UserController {
       if (error instanceof BadRequestException) {
         throw error;
       }
-      throw new BadRequestException(`Failed to update user profile: ${error.message}`);
+      throw new BadRequestException(`Failed to update user profile: ${error.message}`, {
+        cause: error,
+        description: 'An error occurred while updating the user profile. Please check the data format and try again.',
+      });
     }
   }
+
 }

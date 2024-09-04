@@ -95,10 +95,10 @@ export class UserService {
     email?: string;
     name?: string;
     password?: string;
-    skills?: string[];
-    experiences?: { id?: number; title: string; company: string; startDate: Date | string; endDate?: Date | string }[];
-    education?: { id?: number; degree: string; school: string; field: string; startDate: Date | string; endDate?: string }[];
-    interests?: string[];
+    skills?: Array<{ id?: number; name: string; userId?: number }>;
+    experiences?: Array<{ id?: number; title: string; company: string; startDate: Date | string; endDate?: Date | string }>;
+    education?: Array<{ id?: number; degree: string; school: string; field: string; startDate: Date | string; endDate?: Date | string }>;
+    interests?: Array<{ id?: number; name: string; userId?: number }>;
   }) {
     const updateData: any = {};
     
@@ -112,7 +112,7 @@ export class UserService {
       if (Array.isArray(data.skills) && data.skills.length > 0) {
         updateData.skills = {
           deleteMany: {},
-          create: data.skills.map(skill => ({ name: skill })),
+          create: data.skills.map(skill => ({ name: skill.name })),
         };
       }
   
@@ -144,7 +144,7 @@ export class UserService {
       if (Array.isArray(data.interests) && data.interests.length > 0) {
         updateData.interests = {
           deleteMany: {},
-          create: data.interests.map(interest => ({ name: interest })),
+          create: data.interests.map(interest => ({ name: interest.name })),
         };
       }
   
@@ -165,6 +165,7 @@ export class UserService {
       throw new BadRequestException(`Failed to update user: ${error.message}`);
     }
   }
+
   
   
 
