@@ -50,26 +50,40 @@ export class UserController {
     return { user };
   }
 
-  @Put('profile/:id')
-  async updateProfile(
-    @Param('id', ParseIntPipe) userId: number,
-    @Body() updateData: any,
-  ) {
-    try {
-      console.log(`Attempting to update user ${userId} with data:`, JSON.stringify(updateData, null, 2));
-      const updatedUser = await this.userService.updateUser(userId, updateData);
-      return { message: 'Profile updated successfully', user: updatedUser };
-    } catch (error) {
-      console.error(`Error updating user ${userId}:`, error);
-      console.error('Stack trace:', error.stack);
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      throw new BadRequestException(`Failed to update user profile: ${error.message}`, {
+ @Put('profile/:id')
+async updateProfile(
+  @Param('id', ParseIntPipe) userId: number,
+  @Body() updateData: any,
+) {
+  try {
+    console.log(`Attempting to update user ${userId} with data:`, JSON.stringify(updateData, null, 2));
+    
+    // Effectuer la mise à jour de l'utilisateur en appelant le service
+    const updatedUser = await this.userService.updateUserProfile(userId, updateData);
+
+    if (!updatedUser) {
+      throw new BadRequestException(`User with ID ${userId} not found.`);
+    }
+
+    return { message: 'Profile updated successfully', user: updatedUser };
+  } catch (error) {
+    console.error(`Error updating user ${userId}:`, error);
+    console.error('Stack trace:', error.stack);
+
+    // Gestion des exceptions spécifiques
+    if (error instanceof BadRequestException) {
+      throw error;
+    }
+
+    // Gestion de toutes les autres exceptions
+    throw new BadRequestException(
+      `Failed to update user profile: ${error.message}`,
+      {
         cause: error,
         description: 'An error occurred while updating the user profile. Please check the data format and try again.',
-      });
-    }
+      },
+    );
   }
+}
 
 }
